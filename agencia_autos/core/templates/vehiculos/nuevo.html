@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuevo Vehículo - Agencia de Autos{% endblock %}
+
+{% block page_title %}Nuevo Vehículo{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'home' %}" class="hover:text-gray-700">Inicio</a>
+    <span class="mx-2">/</span>
+    <a href="{% url 'vehiculo_lista' %}" class="hover:text-gray-700">Vehículos</a>
+    <span class="mx-2">/</span>
+    <span>Nuevo</span>
+{% endblock %}
+
+{% block current_page %}Nuevo Vehículo{% endblock %}
+
+{% block content_authenticated %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Agregar Nuevo Vehículo</h2>
+        <p class="text-gray-600 mt-1">Completa la información del vehículo para agregarlo al inventario</p>
+    </div>
+    <a href="{% url 'vehiculo_lista' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver al Inventario
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <form method="post" class="max-w-4xl">
+        {% csrf_token %}
+        
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-blue-500">Información del Vehículo</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Marca <span class="text-red-500">*</span>
+                    </label>
+                    <select name="marca_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                        <option value="">Selecciona una marca</option>
+                        {% for marca in marcas %}
+                            <option value="{{ marca.id }}" {% if datos.marca_id == marca.id|stringformat:"s" %}selected{% endif %}>
+                                {{ marca.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Tipo de Vehículo <span class="text-red-500">*</span>
+                    </label>
+                    <select name="tipo_vehiculo_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                        <option value="">Selecciona un tipo</option>
+                        {% for tipo in tipos %}
+                            <option value="{{ tipo.id }}" {% if datos.tipo_vehiculo_id == tipo.id|stringformat:"s" %}selected{% endif %}>
+                                {{ tipo.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Modelo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="modelo" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                           placeholder="Ej: Corolla, Civic, Mustang"
+                           value="{{ datos.modelo|default:'' }}">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Año <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" name="anio" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                           placeholder="Ej: 2024"
+                           min="1900" max="2030"
+                           value="{{ datos.anio|default:'' }}">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Color <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="color" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                           placeholder="Ej: Rojo, Azul, Negro"
+                           value="{{ datos.color|default:'' }}">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        VIN (Número de Serie)
+                    </label>
+                    <input type="text" name="vin" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                           placeholder="Ej: 1HGBH41JXMN109186"
+                           pattern="[A-Z0-9]*"
+                           title="Solo letras mayúsculas y números"
+                           maxlength="17"
+                           value="{{ datos.vin|default:'' }}">
+                    <p class="mt-1 text-sm text-gray-500">Opcional. Máximo 17 caracteres alfanuméricos</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-green-500">Precio</h3>
+            
+            <div class="max-w-md">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Precio de Venta <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-2.5 text-gray-500 text-lg">$</span>
+                    <input type="number" name="precio" required 
+                           class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                           placeholder="250000"
+                           min="0" step="0.01"
+                           value="{{ datos.precio|default:'' }}">
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Precio de venta en pesos</p>
+            </div>
+        </div>
+        
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h4 class="text-sm font-semibold text-blue-800 mb-2">Información Importante</h4>
+                    <ul class="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                        <li>El vehículo será agregado con estado "DISPONIBLE" automáticamente</li>
+                        <li>La fecha de ingreso será la fecha actual</li>
+                        <li>El VIN es opcional pero debe ser único si se proporciona</li>
+                        <li>Todos los campos marcados con * son obligatorios</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-4 pt-6 border-t border-gray-200">
+            <button type="submit" class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors shadow-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Agregar Vehículo
+            </button>
+            <a href="{% url 'vehiculo_lista' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+const vinInput = document.querySelector('input[name="vin"]');
+if (vinInput) {
+    vinInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase();
+    });
+}
+
+document.querySelector('input[name="anio"]').addEventListener('input', function(e) {
+    const anio = parseInt(e.target.value);
+    const anioActual = new Date().getFullYear();
+    
+    if (anio > anioActual + 1) {
+        e.target.classList.add('border-red-500', 'bg-red-50');
+        e.target.classList.remove('border-green-500', 'bg-green-50');
+    } else if (anio >= 1900) {
+        e.target.classList.add('border-green-500', 'bg-green-50');
+        e.target.classList.remove('border-red-500', 'bg-red-50');
+    }
+});
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    const modelo = document.querySelector('input[name="modelo"]').value;
+    const precio = document.querySelector('input[name="precio"]').value;
+    
+    if (!confirm(`¿Estás seguro de agregar el vehículo "${modelo}" al inventario?\n\nPrecio: $${parseFloat(precio).toLocaleString()}`)) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

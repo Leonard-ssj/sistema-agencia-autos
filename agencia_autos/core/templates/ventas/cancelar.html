@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Cancelar Venta #{{ venta.id }} - Agencia de Autos{% endblock %}
+
+{% block page_title %}Cancelar Venta{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'home' %}" class="hover:text-gray-700">Inicio</a>
+    <span class="mx-2">/</span>
+    <a href="{% url 'venta_lista' %}" class="hover:text-gray-700">Ventas</a>
+    <span class="mx-2">/</span>
+    <a href="{% url 'venta_detalle' venta.id %}" class="hover:text-gray-700">#{{ venta.id }}</a>
+    <span class="mx-2">/</span>
+    <span>Cancelar</span>
+{% endblock %}
+
+{% block current_page %}Cancelar Venta #{{ venta.id }}{% endblock %}
+
+{% block content_authenticated %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Cancelar Venta #{{ venta.id }}</h2>
+    <p class="text-gray-600 mt-1">Esta acción no se puede deshacer</p>
+</div>
+
+<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 rounded-r-lg">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+        </div>
+        <div class="ml-3">
+            <h3 class="text-sm font-semibold text-yellow-800">Advertencia: Esta acción no se puede deshacer</h3>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <p class="text-gray-700 mb-4">
+        Está a punto de cancelar la venta #{{ venta.id }}. Esta acción ejecutará la función SQL <code class="bg-gray-100 px-2 py-1 rounded text-sm">cancelar_venta()</code> que:
+    </p>
+    
+    <ul class="space-y-2 mb-6 ml-6 list-disc text-gray-700">
+        <li>Cambiará el estado de la venta a <span class="font-semibold">CANCELADA</span></li>
+        <li>Liberará los vehículos vendidos (estado → <span class="font-semibold">DISPONIBLE</span>)</li>
+        <li>Registrará la acción en la tabla de auditoría</li>
+        <li>Todo dentro de una transacción atómica (BEGIN/COMMIT)</li>
+    </ul>
+</div>
+
+<div class="bg-gray-50 rounded-xl p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-gray-300">Información de la Venta</h3>
+    <dl class="space-y-3">
+        <div class="flex justify-between py-2 border-b border-gray-200">
+            <dt class="font-medium text-gray-700">Cliente</dt>
+            <dd class="text-gray-900">{{ venta.cliente.nombre_completo }}</dd>
+        </div>
+        <div class="flex justify-between py-2 border-b border-gray-200">
+            <dt class="font-medium text-gray-700">Fecha</dt>
+            <dd class="text-gray-900">{{ venta.fecha_venta|date:"d/m/Y" }}</dd>
+        </div>
+        <div class="flex justify-between py-2 border-b border-gray-200">
+            <dt class="font-medium text-gray-700">Total</dt>
+            <dd class="text-xl font-bold text-green-600">${{ venta.total_venta|floatformat:2 }}</dd>
+        </div>
+        <div class="flex justify-between py-2">
+            <dt class="font-medium text-gray-700">Estado Actual</dt>
+            <dd>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {{ venta.estado_venta }}
+                </span>
+            </dd>
+        </div>
+    </dl>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="flex gap-4">
+        <button type="submit" class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm font-medium">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Confirmar Cancelación
+        </button>
+        <a href="{% url 'venta_detalle' venta.id %}" class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver sin Cancelar
+        </a>
+    </div>
+</form>
+{% endblock %}

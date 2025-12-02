@@ -1,0 +1,130 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header }}</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    <p><strong>Vista:</strong> <code>vw_ventas_mes_marca</code></p>
+    <p><strong>Técnica:</strong> <code>PIVOT</code> usando <code>SUM(CASE WHEN ... THEN ... ELSE 0 END)</code></p>
+    
+    <!-- Filtros -->
+    <form method="get" style="margin: 20px 0; padding: 15px; background: #000000; border-radius: 5px;">
+        <label for="anio">Año:</label>
+        <select name="anio" id="anio">
+            <option value="">Todos los años</option>
+            {% for anio in anios_disponibles %}
+            <option value="{{ anio }}" {% if anio_seleccionado == anio|stringformat:"s" %}selected{% endif %}>{{ anio }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" style="margin-left: 20px; padding: 5px 15px;">Filtrar</button>
+        <a href="{% url 'admin_pivot_ventas' %}" style="margin-left: 10px; padding: 5px 15px; background: #ccc; color: #000; text-decoration: none; border-radius: 3px;">Limpiar</a>
+    </form>
+    
+    <!-- Tabla PIVOT -->
+    {% if results %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; min-width: 1200px;">
+            <thead>
+                <tr style="background: #000000; color: #ffffff;">
+                    <th style="padding: 10px; text-align: center; border: 1px solid #333;">Año</th>
+                    <th style="padding: 10px; text-align: center; border: 1px solid #333;">Mes</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Toyota</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Honda</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Ford</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Chevrolet</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Nissan</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Mazda</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Volkswagen</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Otras</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333; background: #2c5f7a;">Total Mes</th>
+                    <th style="padding: 10px; text-align: center; border: 1px solid #333; background: #2c5f7a;">Ventas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr style="{% cycle 'background: #1a1a1a; color: #ffffff;' 'background: #2a2a2a; color: #ffffff;' %}">
+                    <td style="padding: 8px; text-align: center; border: 1px solid #333; font-weight: bold;">{{ row.anio }}</td>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #333;">{{ row.mes }} - {{ row.mes_nombre|truncatewords:1 }}</td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.toyota > 0 %}${{ row.toyota|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.honda > 0 %}${{ row.honda|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.ford > 0 %}${{ row.ford|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.chevrolet > 0 %}${{ row.chevrolet|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.nissan > 0 %}${{ row.nissan|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.mazda > 0 %}${{ row.mazda|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.volkswagen > 0 %}${{ row.volkswagen|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                        {% if row.otras_marcas > 0 %}${{ row.otras_marcas|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333; font-weight: bold; background: #e8f5e9;">
+                        ${{ row.total_mes|floatformat:2 }}
+                    </td>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #333; background: #e8f5e9;">
+                        {{ row.cantidad_ventas }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<!--     
+    <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
+        <p style="margin: 0; font-size: 14px;">
+            <strong>Explicación del PIVOT:</strong> Esta tabla muestra las ventas organizadas por mes (filas) y marca (columnas).
+            Se implementa usando <code>SUM(CASE WHEN marca = 'Toyota' THEN total_venta ELSE 0 END)</code> para cada marca.
+            Esto permite ver rápidamente qué marcas vendieron más en cada mes.
+        </p>
+    </div> -->
+    
+    <p style="margin-top: 20px; color: #666;">
+        <strong>Total de meses mostrados:</strong> {{ results|length }}
+    </p>
+    {% else %}
+    <p style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px;">
+        No hay datos disponibles para los filtros seleccionados.
+    </p>
+    {% endif %}
+    
+    <!-- Botón para volver -->
+    <div style="margin-top: 30px;">
+        <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px; background: #000000; color: #ffffff; text-decoration: none; border-radius: 5px;">
+            ← Volver al Panel de Administración
+        </a>
+    </div>
+</div>
+
+<style>
+    table {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    th {
+        font-weight: bold;
+    }
+    
+    tbody tr:hover {
+        background: #3a3a3a !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}

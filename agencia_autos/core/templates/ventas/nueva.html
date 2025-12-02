@@ -1,0 +1,524 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Registrar Nueva Venta - Agencia de Autos{% endblock %}
+
+{% block page_title %}Nueva Venta{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'home' %}" class="hover:text-gray-700">Inicio</a>
+    <span class="mx-2">/</span>
+    <a href="{% url 'venta_lista' %}" class="hover:text-gray-700">Ventas</a>
+    <span class="mx-2">/</span>
+    <span>Nueva</span>
+{% endblock %}
+
+{% block current_page %}Registrar Nueva Venta{% endblock %}
+
+{% block content_authenticated %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Registrar Nueva Venta</h2>
+        <p class="text-gray-600 mt-1">Complete el formulario para registrar una venta</p>
+    </div>
+    <a href="{% url 'venta_lista' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver a Ventas
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <form method="post" class="max-w-4xl">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-blue-500">Información del Cliente</h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Cliente <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="hidden" name="cliente_id" id="cliente_id" required>
+                            <input type="text" id="cliente_selected" readonly placeholder="Haz clic en Buscar para seleccionar..." 
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                            <button type="button" onclick="openClienteModal()" 
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Vendedor <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="hidden" name="empleado_id" id="empleado_id" required>
+                            <input type="text" id="empleado_selected" readonly placeholder="Haz clic en Buscar para seleccionar..." 
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                            <button type="button" onclick="openEmpleadoModal()" 
+                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Método de Pago <span class="text-red-500">*</span>
+                        </label>
+                        <select name="metodo_pago_id" id="metodo_pago_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                            <option value="">Seleccione método de pago</option>
+                            {% for metodo in metodos_pago %}
+                                <option value="{{ metodo.id }}">{{ metodo.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-green-500">Información del Vehículo</h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Vehículo Seleccionado <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="hidden" name="vehiculo_id" id="vehiculo_id" required>
+                            <input type="text" id="vehiculo_selected" readonly 
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                                   placeholder="Haz clic en Buscar para seleccionar...">
+                            <button type="button" onclick="openVehiculoModal()" 
+                                    class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                Buscar
+                            </button>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Usa el botón "Buscar" para ver y filtrar vehículos disponibles</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Precio <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-2.5 text-gray-500 text-lg">$</span>
+                            <input type="number" name="precio" id="precio" step="0.01" min="0" required readonly
+                                   class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">El precio se actualiza automáticamente al seleccionar el vehículo</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Descuentos</h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="checkbox" name="descuento_temporada" class="mr-3">
+                                <span class="text-sm text-gray-700">Aplicar descuento de temporada (10%)</span>
+                            </label>
+                            
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="checkbox" name="cliente_frecuente" class="mr-3">
+                                <span class="text-sm text-gray-700">Cliente frecuente (5% adicional)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-4 pt-6 mt-6 border-t border-gray-200">
+            <button type="submit" class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors shadow-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Registrar Venta
+            </button>
+            <a href="{% url 'venta_lista' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Modal Cliente -->
+<div id="clienteModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-500 to-blue-600">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    Seleccionar Cliente
+                </h3>
+                <button type="button" onclick="closeClienteModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <input type="text" id="clienteSearch" placeholder="Buscar por nombre, email o documento..." 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </div>
+                <div class="overflow-y-auto max-h-96">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documento</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clienteTableBody" class="bg-white divide-y divide-gray-200">
+                            {% for cliente in clientes %}
+                            <tr class="hover:bg-blue-50 transition-colors cliente-row" 
+                                data-search="{{ cliente.nombre_completo|lower }} {{ cliente.numero_documento }} {{ cliente.email|lower }}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ cliente.nombre_completo }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ cliente.numero_documento }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ cliente.email }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <button type="button" onclick="selectCliente('{{ cliente.id }}', '{{ cliente.nombre_completo }}', '{{ cliente.numero_documento }}')" 
+                                            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                                        Seleccionar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Empleado -->
+<div id="empleadoModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-green-500 to-green-600">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    Seleccionar Vendedor
+                </h3>
+                <button type="button" onclick="closeEmpleadoModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <input type="text" id="empleadoSearch" placeholder="Buscar por nombre o puesto..." 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
+                </div>
+                <div class="overflow-y-auto max-h-96">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Puesto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="empleadoTableBody" class="bg-white divide-y divide-gray-200">
+                            {% for empleado in empleados %}
+                            <tr class="hover:bg-green-50 transition-colors empleado-row" 
+                                data-search="{{ empleado.nombre_completo|lower }} {{ empleado.puesto|lower }}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ empleado.nombre_completo }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ empleado.puesto }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">{{ empleado.estado }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <button type="button" onclick="selectEmpleado('{{ empleado.id }}', '{{ empleado.nombre_completo }}', '{{ empleado.puesto }}')" 
+                                            class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                                        Seleccionar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Vehículo -->
+<div id="vehiculoModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-500 to-purple-600">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    Seleccionar Vehículo
+                </h3>
+                <button type="button" onclick="closeVehiculoModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <input type="text" id="vehiculoSearch" placeholder="Buscar por marca, modelo, color..." 
+                           class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
+                    <select id="marcaFilter" class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
+                        <option value="">Todas las marcas</option>
+                        {% for vehiculo in vehiculos_disponibles %}
+                            <option value="{{ vehiculo.marca.nombre }}">{{ vehiculo.marca.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="tipoFilter" class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
+                        <option value="">Todos los tipos</option>
+                        {% for vehiculo in vehiculos_disponibles %}
+                            <option value="{{ vehiculo.tipo_vehiculo.nombre }}">{{ vehiculo.tipo_vehiculo.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="overflow-y-auto max-h-96">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Año</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Color</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vehiculoTableBody" class="bg-white divide-y divide-gray-200">
+                            {% for vehiculo in vehiculos_disponibles %}
+                            <tr class="hover:bg-purple-50 transition-colors vehiculo-row" 
+                                data-search="{{ vehiculo.marca.nombre|lower }} {{ vehiculo.modelo|lower }} {{ vehiculo.anio }} {{ vehiculo.color|lower }}"
+                                data-marca="{{ vehiculo.marca.nombre }}"
+                                data-tipo="{{ vehiculo.tipo_vehiculo.nombre }}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{{ vehiculo.marca.nombre }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ vehiculo.modelo }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">{{ vehiculo.anio }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ vehiculo.color }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ vehiculo.tipo_vehiculo.nombre }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">{{ vehiculo.precio|currency }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <button type="button" onclick="selectVehiculo('{{ vehiculo.id }}', '{{ vehiculo.marca.nombre }} {{ vehiculo.modelo }} {{ vehiculo.anio }}', '{{ vehiculo.precio }}')" 
+                                            class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                                        Seleccionar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== FUNCIONES DE MODALES ==========
+
+// Abrir/Cerrar Modal Cliente
+function openClienteModal() {
+    document.getElementById('clienteModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('clienteSearch').focus();
+}
+
+function closeClienteModal() {
+    document.getElementById('clienteModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Abrir/Cerrar Modal Empleado
+function openEmpleadoModal() {
+    document.getElementById('empleadoModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('empleadoSearch').focus();
+}
+
+function closeEmpleadoModal() {
+    document.getElementById('empleadoModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Abrir/Cerrar Modal Vehículo
+function openVehiculoModal() {
+    document.getElementById('vehiculoModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('vehiculoSearch').focus();
+}
+
+function closeVehiculoModal() {
+    document.getElementById('vehiculoModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// ========== FUNCIONES DE SELECCIÓN ==========
+
+function selectCliente(id, nombre, documento) {
+    document.getElementById('cliente_id').value = id;
+    document.getElementById('cliente_selected').value = `${nombre} - ${documento}`;
+    closeClienteModal();
+}
+
+function selectEmpleado(id, nombre, puesto) {
+    document.getElementById('empleado_id').value = id;
+    document.getElementById('empleado_selected').value = `${nombre} - ${puesto}`;
+    closeEmpleadoModal();
+}
+
+function selectVehiculo(id, descripcion, precio) {
+    document.getElementById('vehiculo_id').value = id;
+    const precioFormateado = parseFloat(precio).toLocaleString('es-MX', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    document.getElementById('vehiculo_selected').value = `${descripcion} - $${precioFormateado}`;
+    
+    const precioInput = document.getElementById('precio');
+    if (precioInput) {
+        precioInput.value = precio;
+    }
+    closeVehiculoModal();
+}
+
+// ========== BÚSQUEDA Y FILTROS ==========
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Búsqueda de clientes
+    const clienteSearch = document.getElementById('clienteSearch');
+    if (clienteSearch) {
+        clienteSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#clienteTableBody .cliente-row');
+            
+            rows.forEach(row => {
+                const searchData = row.dataset.search;
+                row.style.display = searchData.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+    
+    // Búsqueda de empleados
+    const empleadoSearch = document.getElementById('empleadoSearch');
+    if (empleadoSearch) {
+        empleadoSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#empleadoTableBody .empleado-row');
+            
+            rows.forEach(row => {
+                const searchData = row.dataset.search;
+                row.style.display = searchData.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+    
+    // Búsqueda y filtros de vehículos
+    const vehiculoSearch = document.getElementById('vehiculoSearch');
+    const marcaFilter = document.getElementById('marcaFilter');
+    const tipoFilter = document.getElementById('tipoFilter');
+    
+    function filterVehiculos() {
+        const searchTerm = vehiculoSearch ? vehiculoSearch.value.toLowerCase() : '';
+        const marcaSelected = marcaFilter ? marcaFilter.value : '';
+        const tipoSelected = tipoFilter ? tipoFilter.value : '';
+        const rows = document.querySelectorAll('#vehiculoTableBody .vehiculo-row');
+        
+        rows.forEach(row => {
+            const searchData = row.dataset.search;
+            const marca = row.dataset.marca;
+            const tipo = row.dataset.tipo;
+            
+            const matchesSearch = searchData.includes(searchTerm);
+            const matchesMarca = !marcaSelected || marca === marcaSelected;
+            const matchesTipo = !tipoSelected || tipo === tipoSelected;
+            
+            row.style.display = (matchesSearch && matchesMarca && matchesTipo) ? '' : 'none';
+        });
+    }
+    
+    if (vehiculoSearch) vehiculoSearch.addEventListener('input', filterVehiculos);
+    if (marcaFilter) marcaFilter.addEventListener('change', filterVehiculos);
+    if (tipoFilter) tipoFilter.addEventListener('change', filterVehiculos);
+    
+    // Eliminar opciones duplicadas en filtros
+    function removeDuplicateOptions(selectElement) {
+        if (!selectElement) return;
+        const seen = new Set();
+        const options = Array.from(selectElement.options);
+        
+        options.forEach(option => {
+            if (option.value && seen.has(option.value)) {
+                option.remove();
+            } else if (option.value) {
+                seen.add(option.value);
+            }
+        });
+    }
+    
+    removeDuplicateOptions(marcaFilter);
+    removeDuplicateOptions(tipoFilter);
+    
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeClienteModal();
+            closeEmpleadoModal();
+            closeVehiculoModal();
+        }
+    });
+    
+    // Cerrar al hacer clic en el fondo
+    ['clienteModal', 'empleadoModal', 'vehiculoModal'].forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    if (modalId === 'clienteModal') closeClienteModal();
+                    if (modalId === 'empleadoModal') closeEmpleadoModal();
+                    if (modalId === 'vehiculoModal') closeVehiculoModal();
+                }
+            });
+        }
+    });
+    
+    // También permitir clic en los inputs readonly para abrir modales
+    document.getElementById('cliente_selected')?.addEventListener('click', openClienteModal);
+    document.getElementById('empleado_selected')?.addEventListener('click', openEmpleadoModal);
+    document.getElementById('vehiculo_selected')?.addEventListener('click', openVehiculoModal);
+});
+</script>
+{% endblock %}

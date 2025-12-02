@@ -1,0 +1,156 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header }}</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    <p><strong>Vista:</strong> <code>vw_inventario_analisis</code></p>
+    <p><strong>Técnicas:</strong> <code>Subconsultas</code>, <code>CASE</code>, Comparaciones con promedios</p>
+    
+    <!-- Filtros -->
+    <form method="get" style="margin: 20px 0; padding: 15px; background: #000000; border-radius: 5px;">
+        <label for="estado">Estado:</label>
+        <select name="estado" id="estado">
+            <option value="">Todos los estados</option>
+            {% for est in estados %}
+            <option value="{{ est }}" {% if estado_seleccionado == est %}selected{% endif %}>{{ est }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="nivel" style="margin-left: 20px;">Nivel de Inventario:</label>
+        <select name="nivel" id="nivel">
+            <option value="">Todos los niveles</option>
+            {% for niv in niveles %}
+            <option value="{{ niv }}" {% if nivel_seleccionado == niv %}selected{% endif %}>{{ niv }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" style="margin-left: 20px; padding: 5px 15px;">Filtrar</button>
+        <a href="{% url 'admin_inventario_analisis' %}" style="margin-left: 10px; padding: 5px 15px; background: #ccc; color: #000; text-decoration: none; border-radius: 3px;">Limpiar</a>
+    </form>
+    
+    <!-- Tabla de resultados -->
+    {% if results %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; min-width: 1200px;">
+            <thead>
+                <tr style="background: #000000; color: #ffffff;">
+                    <th style="padding: 10px; text-align: left; border: 1px solid #333;">ID</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #333;">Marca</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #333;">Modelo</th>
+                    <th style="padding: 10px; text-align: center; border: 1px solid #333;">Año</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Precio</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Promedio Marca</th>
+                    <th style="padding: 10px; text-align: right; border: 1px solid #333;">Diferencia</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #333;">Color</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #333;">Tipo</th>
+                    <th style="padding: 10px; text-align: center; border: 1px solid #333;">Estado</th>
+                    <th style="padding: 10px; text-align: center; border: 1px solid #333;">Días</th>
+                    <th style="padding: 10px; text-align: center; border: 1px solid #333;">Nivel</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr style="{% cycle 'background: #1a1a1a; color: #ffffff;' 'background: #2a2a2a; color: #ffffff;' %}">
+                    <td style="padding: 8px; border: 1px solid #333;">
+                        <a href="{% url 'admin:core_vehiculo_change' row.vehiculo_id %}" style="color: #4fc3f7;">
+                            {{ row.vehiculo_id }}
+                        </a>
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #333; font-weight: bold;">{{ row.marca }}</td>
+                    <td style="padding: 8px; border: 1px solid #333;">{{ row.modelo }}</td>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #333;">{{ row.anio }}</td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333; font-weight: bold;">
+                        ${{ row.precio|floatformat:2 }}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333; color: #666;">
+                        ${{ row.precio_promedio_marca|floatformat:2 }}
+                    </td>
+                    <td style="padding: 8px; text-align: right; border: 1px solid #333; font-weight: bold; {% if row.diferencia_promedio > 0 %}color: #d32f2f;{% else %}color: #388e3c;{% endif %}">
+                        {% if row.diferencia_promedio > 0 %}+{% endif %}${{ row.diferencia_promedio|floatformat:2 }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #333;">{{ row.color }}</td>
+                    <td style="padding: 8px; border: 1px solid #333;">{{ row.tipo_vehiculo }}</td>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #333;">
+                        {% if row.estado_disponibilidad == 'DISPONIBLE' %}
+                        <span style="padding: 5px 10px; background: #4caf50; color: white; border-radius: 3px; font-size: 12px;">DISPONIBLE</span>
+                        {% elif row.estado_disponibilidad == 'VENDIDO' %}
+                        <span style="padding: 5px 10px; background: #f44336; color: white; border-radius: 3px; font-size: 12px;">VENDIDO</span>
+                        {% else %}
+                        <span style="padding: 5px 10px; background: #ff9800; color: white; border-radius: 3px; font-size: 12px;">RESERVADO</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #333;">{{ row.dias_en_inventario }}</td>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #333;">
+                        {% if row.nivel_inventario == 'CRITICO' %}
+                        <span style="padding: 5px 10px; background: #f44336; color: white; border-radius: 3px; font-size: 12px;">CRÍTICO</span>
+                        {% elif row.nivel_inventario == 'ALTO' %}
+                        <span style="padding: 5px 10px; background: #ff9800; color: white; border-radius: 3px; font-size: 12px;">ALTO</span>
+                        {% elif row.nivel_inventario == 'MEDIO' %}
+                        <span style="padding: 5px 10px; background: #ffc107; color: white; border-radius: 3px; font-size: 12px;">MEDIO</span>
+                        {% else %}
+                        <span style="padding: 5px 10px; background: #4caf50; color: white; border-radius: 3px; font-size: 12px;">NUEVO</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
+        <p style="margin: 0 0 10px 0; font-size: 14px;">
+            <strong>💡 Explicación de Subconsultas:</strong>
+        </p>
+        <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+            <li><strong>Precio Promedio Marca:</strong> Calculado con subconsulta <code>(SELECT AVG(precio) FROM vehiculo WHERE marca_id = v.marca_id)</code></li>
+            <li><strong>Diferencia:</strong> Compara el precio del vehículo con el promedio de su marca</li>
+            <li><strong>Nivel de Inventario:</strong> Clasificado con <code>CASE</code> según días en inventario:
+                <ul style="margin-top: 5px;">
+                    <li>NUEVO: 0-30 días</li>
+                    <li>MEDIO: 31-90 días</li>
+                    <li>ALTO: 91-180 días</li>
+                    <li>CRÍTICO: más de 180 días</li>
+                </ul>
+            </li>
+        </ul>
+    </div> -->
+    
+    <p style="margin-top: 20px; color: #666;">
+        <strong>Total de vehículos:</strong> {{ results|length }} (limitado a 50 registros)
+    </p>
+    {% else %}
+    <p style="margin-top: 20px; padding: 15px; background: #000000; border: 1px solid #000000; border-radius: 5px;">
+        No hay vehículos disponibles para los filtros seleccionados.
+    </p>
+    {% endif %}
+    
+    <!-- Botón para volver -->
+    <div style="margin-top: 30px;">
+        <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px; background: #000000; color: #ffffff; text-decoration: none; border-radius: 5px;">
+            ← Volver al Panel de Administración
+        </a>
+    </div>
+</div>
+
+<style>
+    table {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    th {
+        font-weight: bold;
+    }
+    
+    tbody tr:hover {
+        background: #3a3a3a !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}

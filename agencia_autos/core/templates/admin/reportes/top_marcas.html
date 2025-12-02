@@ -1,0 +1,106 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header }}</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    <p><strong>Procedimiento Almacenado:</strong> <code>top_marcas_modelos()</code></p>
+    
+    <!-- Filtros -->
+    <form method="get" style="margin: 20px 0; padding: 15px; background: #000000; border-radius: 5px;">
+        <label for="anio">Año:</label>
+        <select name="anio" id="anio">
+            <option value="">Todos los años</option>
+            {% for anio in anios_disponibles %}
+            <option value="{{ anio }}" {% if anio_seleccionado == anio|stringformat:"s" %}selected{% endif %}>{{ anio }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="limite" style="margin-left: 20px;">Límite:</label>
+        <select name="limite" id="limite">
+            <option value="5" {% if limite == "5" %}selected{% endif %}>Top 5</option>
+            <option value="10" {% if limite == "10" %}selected{% endif %}>Top 10</option>
+            <option value="20" {% if limite == "20" %}selected{% endif %}>Top 20</option>
+        </select>
+        
+        <button type="submit" style="margin-left: 20px; padding: 5px 15px;">Filtrar</button>
+        <a href="{% url 'admin_top_marcas' %}" style="margin-left: 10px; padding: 5px 15px; background: #ccc; color: #000; text-decoration: none; border-radius: 3px;">Limpiar</a>
+    </form>
+    
+    <!-- Tabla de resultados -->
+    {% if results %}
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="background: #000000; color: #ffffff;">
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Posición</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Marca</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Modelo</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">Cantidad Vendida</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">Total Ventas</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">Precio Promedio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr style="{% cycle 'background: #1a1a1a; color: #ffffff;' 'background: #2a2a2a; color: #ffffff;' %}">
+                <td style="padding: 8px; border: 1px solid #333;">{{ forloop.counter }}</td>
+                <td style="padding: 8px; border: 1px solid #333;"><strong>{{ row.marca }}</strong></td>
+                <td style="padding: 8px; border: 1px solid #333;">{{ row.modelo }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333;">{{ row.cantidad_vendida }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333;">${{ row.total_ventas|floatformat:2 }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333;">${{ row.precio_promedio|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background: #000000; color: #ffffff; font-weight: bold;">
+                <td colspan="3" style="padding: 10px; border: 1px solid #333;">TOTAL</td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #333;">
+                    {{ results|length }} registros
+                </td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #333;">
+                    -
+                </td>
+                <td style="padding: 10px; border: 1px solid #333;"></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <p style="margin-top: 20px; color: #666;">
+        <strong>Total de resultados:</strong> {{ results|length }} marca(s)/modelo(s)
+    </p>
+    {% else %}
+    <p style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px;">
+        No hay datos disponibles para los filtros seleccionados.
+    </p>
+    {% endif %}
+    
+    <!-- Botón para volver -->
+    <div style="margin-top: 30px;">
+        <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px; background: #417690; color: white; text-decoration: none; border-radius: 5px;">
+            ← Volver al Panel de Administración
+        </a>
+    </div>
+</div>
+
+<style>
+    table {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    th {
+        font-weight: bold;
+    }
+    
+    tbody tr:hover {
+        background: #3a3a3a !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}

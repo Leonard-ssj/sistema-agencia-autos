@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Venta #{{ venta.id }} - Agencia de Autos{% endblock %}
+
+{% block page_title %}Detalle de Venta{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'home' %}" class="hover:text-gray-700">Inicio</a>
+    <span class="mx-2">/</span>
+    <a href="{% url 'venta_lista' %}" class="hover:text-gray-700">Ventas</a>
+    <span class="mx-2">/</span>
+    <span>#{{ venta.id }}</span>
+{% endblock %}
+
+{% block current_page %}Venta #{{ venta.id }}{% endblock %}
+
+{% block content_authenticated %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Venta #{{ venta.id }}</h2>
+        <p class="text-gray-600 mt-1">{{ venta.fecha_venta|date:"d/m/Y" }}</p>
+    </div>
+    <div class="flex gap-3">
+        {% if venta.estado_venta == 'ACTIVA' and user.groups.all.0.name == 'Administrador' %}
+            <a href="{% url 'cancelar_venta' venta.id %}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Cancelar Venta
+            </a>
+        {% endif %}
+        <a href="{% url 'venta_lista' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver a Ventas
+        </a>
+    </div>
+</div>
+
+<div class="mb-6">
+    {% if venta.estado_venta == 'ACTIVA' %}
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+            <p class="font-semibold text-green-800">Estado: Activa</p>
+        </div>
+    {% elif venta.estado_venta == 'CANCELADA' %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+            <p class="font-semibold text-red-800">Estado: Cancelada</p>
+        </div>
+    {% else %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+            <p class="font-semibold text-yellow-800">Estado: Pendiente</p>
+        </div>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-blue-500">Información del Cliente</h3>
+        <dl class="space-y-3">
+            <div class="flex justify-between py-2 border-b border-gray-100">
+                <dt class="font-medium text-gray-700">Nombre</dt>
+                <dd class="text-gray-900">{{ venta.cliente.nombre_completo }}</dd>
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-100">
+                <dt class="font-medium text-gray-700">Email</dt>
+                <dd class="text-gray-900">{{ venta.cliente.email }}</dd>
+            </div>
+            <div class="flex justify-between py-2">
+                <dt class="font-medium text-gray-700">Teléfono</dt>
+                <dd class="text-gray-900">{{ venta.cliente.telefono|default:"N/A" }}</dd>
+            </div>
+        </dl>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-green-500">Información de la Venta</h3>
+        <dl class="space-y-3">
+            <div class="flex justify-between py-2 border-b border-gray-100">
+                <dt class="font-medium text-gray-700">Vendedor</dt>
+                <dd class="text-gray-900">{{ venta.empleado.nombre_completo }}</dd>
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-100">
+                <dt class="font-medium text-gray-700">Fecha</dt>
+                <dd class="text-gray-900">{{ venta.fecha_venta|date:"d/m/Y" }}</dd>
+            </div>
+            <div class="flex justify-between py-2">
+                <dt class="font-medium text-gray-700">Método de Pago</dt>
+                <dd class="text-gray-900">{{ venta.metodo_pago.nombre }}</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <h3 class="text-lg font-semibold text-gray-800">Vehículos Vendidos</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehículo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unitario</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for detalle in detalles %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        <a href="{% url 'detalle_vehiculo' detalle.vehiculo.id %}" class="text-primary hover:text-primary-dark">
+                            {{ detalle.vehiculo.modelo }} {{ detalle.vehiculo.anio }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ detalle.vehiculo.marca.nombre }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ detalle.vehiculo.tipo_vehiculo.nombre }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ detalle.cantidad }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ detalle.precio_unitario|currency }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ detalle.subtotal|currency }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-sm">
+    <div class="max-w-md ml-auto">
+        <div class="flex justify-between items-center py-3 border-b border-gray-300">
+            <span class="text-gray-700">Descuento Aplicado:</span>
+            <div class="text-right">
+                <span class="text-lg font-semibold text-orange-600">-{{ venta.descuento_aplicado|currency }}</span>
+                {% if venta.descuento_aplicado > 0 %}
+                    {% with subtotal=venta.total_venta|add:venta.descuento_aplicado %}
+                        {% widthratio venta.descuento_aplicado subtotal 100 as porcentaje %}
+                        <div class="text-sm text-orange-500">({{ porcentaje|floatformat:1 }}% de descuento)</div>
+                    {% endwith %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex justify-between items-center py-4">
+            <span class="text-xl font-semibold text-gray-800">Total:</span>
+            <span class="text-3xl font-bold text-green-600">{{ venta.total_venta|currency }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

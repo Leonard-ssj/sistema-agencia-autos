@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Lista de Ventas - Agencia de Autos{% endblock %}
+
+{% block page_title %}Gestión de Ventas{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'home' %}" class="hover:text-gray-700">Inicio</a>
+    <span class="mx-2">/</span>
+    <span>Ventas</span>
+{% endblock %}
+
+{% block current_page %}Lista de Ventas{% endblock %}
+
+{% block content_authenticated %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Gestión de Ventas</h2>
+        <p class="text-gray-600 mt-1">Administra todas las transacciones de vehículos</p>
+    </div>
+    {% if user.groups.all.0.name == 'Administrador' or user.groups.all.0.name == 'Vendedor' %}
+        <a href="{% url 'venta_nueva' %}" class="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors shadow-sm">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nueva Venta
+        </a>
+    {% endif %}
+</div>
+
+<!-- Métricas -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+    <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl p-6 shadow-lg">
+        <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-white bg-opacity-20 rounded-xl">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <span class="text-sm opacity-80">Total</span>
+        </div>
+        <h3 class="text-lg font-medium opacity-90 mb-2">Total de Ventas</h3>
+        <p class="text-4xl font-bold">{{ total_ventas|default:0 }}</p>
+    </div>
+    
+    <div class="bg-gradient-to-br from-blue-500 to-cyan-600 text-white rounded-xl p-6 shadow-lg">
+        <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-white bg-opacity-20 rounded-xl">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <span class="text-sm opacity-80">Este Mes</span>
+        </div>
+        <h3 class="text-lg font-medium opacity-90 mb-2">Ventas del Mes</h3>
+        <p class="text-4xl font-bold">{{ ventas_mes|default:0 }}</p>
+    </div>
+    
+    <div class="bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-xl p-6 shadow-lg">
+        <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-white bg-opacity-20 rounded-xl">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <span class="text-sm opacity-80">Ingresos</span>
+        </div>
+        <h3 class="text-lg font-medium opacity-90 mb-2">Ingresos del Mes</h3>
+        <p class="text-4xl font-bold">{{ ingresos_mes|default:0|currency }}</p>
+    </div>
+    
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl p-6 shadow-lg">
+        <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-white bg-opacity-20 rounded-xl">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <span class="text-sm opacity-80">Promedio</span>
+        </div>
+        <h3 class="text-lg font-medium opacity-90 mb-2">Promedio por Venta</h3>
+        <p class="text-4xl font-bold">{{ promedio_venta|default:0|currency }}</p>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtros de Búsqueda</h3>
+    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+            <select name="estado" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                <option value="">Todos los estados</option>
+                <option value="ACTIVA" {% if estado_filtro == "ACTIVA" %}selected{% endif %}>Activa</option>
+                <option value="CANCELADA" {% if estado_filtro == "CANCELADA" %}selected{% endif %}>Cancelada</option>
+                <option value="PENDIENTE" {% if estado_filtro == "PENDIENTE" %}selected{% endif %}>Pendiente</option>
+            </select>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Desde</label>
+            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+        </div>
+        
+        <div class="flex items-end">
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors shadow-sm">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <h3 class="text-lg font-semibold text-gray-800">Lista de Ventas ({{ ventas|length }})</h3>
+    </div>
+    
+    {% if ventas %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descuento</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Método Pago</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for venta in ventas %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ venta.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ venta.cliente.nombre_completo }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ venta.empleado.nombre_completo }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <div>{{ venta.fecha_venta|date:"d/m/Y" }}</div>
+                        <div class="text-xs text-gray-500">{{ venta.fecha_creacion|date:"H:i" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">{{ venta.total_venta|currency }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-600">
+                        {% if venta.descuento_aplicado > 0 %}
+                            <div>-{{ venta.descuento_aplicado|currency }}</div>
+                            {% widthratio venta.descuento_aplicado venta.total_venta 100 as porcentaje %}
+                            <div class="text-xs text-orange-500">({{ porcentaje|floatformat:1 }}%)</div>
+                        {% else %}
+                            <span class="text-gray-400">Sin descuento</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ venta.metodo_pago.nombre }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if venta.estado_venta == 'ACTIVA' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Activa
+                            </span>
+                        {% elif venta.estado_venta == 'CANCELADA' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Cancelada
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Pendiente
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{% url 'venta_detalle' venta.id %}" class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Ver
+                            </a>
+                            {% if user.groups.all.0.name == 'Administrador' and venta.estado_venta == 'ACTIVA' %}
+                                <a href="{% url 'cancelar_venta' venta.id %}" class="inline-flex items-center px-3 py-1 border border-red-300 bg-red-50 rounded-lg text-red-700 hover:bg-red-100 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Cancelar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="px-6 py-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No se encontraron ventas</h3>
+        <p class="text-gray-600 mb-6">No hay ventas que coincidan con los filtros seleccionados.</p>
+        {% if user.groups.all.0.name == 'Administrador' or user.groups.all.0.name == 'Vendedor' %}
+            <a href="{% url 'venta_nueva' %}" class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors shadow-sm">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Registrar Primera Venta
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% include 'pagination.html' %}
+</div>
+
+{% endblock %}

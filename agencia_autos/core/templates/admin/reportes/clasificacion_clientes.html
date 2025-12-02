@@ -1,0 +1,108 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header }}</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    <p><strong>Procedimiento Almacenado:</strong> <code>clasificar_clientes()</code></p>
+    <p><strong>Técnica:</strong> Uso de <code>CASE</code> para clasificación</p>
+    
+    <!-- Estadísticas -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0;">
+        <div style="padding: 20px; background: #4caf50; color: white; border-radius: 5px; text-align: center;">
+            <h2 style="margin: 0; font-size: 36px;">{{ stats.vip }}</h2>
+            <p style="margin: 5px 0 0 0;">VIP (5+ compras)</p>
+        </div>
+        <div style="padding: 20px; background: #2196f3; color: white; border-radius: 5px; text-align: center;">
+            <h2 style="margin: 0; font-size: 36px;">{{ stats.frecuente }}</h2>
+            <p style="margin: 5px 0 0 0;">FRECUENTE (3-4 compras)</p>
+        </div>
+        <div style="padding: 20px; background: #ff9800; color: white; border-radius: 5px; text-align: center;">
+            <h2 style="margin: 0; font-size: 36px;">{{ stats.regular }}</h2>
+            <p style="margin: 5px 0 0 0;">REGULAR (1-2 compras)</p>
+        </div>
+        <div style="padding: 20px; background: #9e9e9e; color: white; border-radius: 5px; text-align: center;">
+            <h2 style="margin: 0; font-size: 36px;">{{ stats.nuevo }}</h2>
+            <p style="margin: 5px 0 0 0;">NUEVO (0 compras)</p>
+        </div>
+    </div>
+    
+    <!-- Tabla de resultados -->
+    {% if results %}
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="background: #000000; color: #ffffff;">
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">ID</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Nombre Completo</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Email</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333;">Total Compras</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">Monto Total</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333;">Clasificación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr style="{% cycle 'background: #1a1a1a; color: #ffffff;' 'background: #2a2a2a; color: #ffffff;' %}">
+                <td style="padding: 8px; border: 1px solid #333;">
+                    <a href="{% url 'admin:core_cliente_change' row.cliente_id %}" style="color: #4fc3f7;">
+                        {{ row.cliente_id }}
+                    </a>
+                </td>
+                <td style="padding: 8px; border: 1px solid #333;">{{ row.nombre_completo }}</td>
+                <td style="padding: 8px; border: 1px solid #333;">{{ row.email }}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333;">{{ row.total_compras }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333;">${{ row.monto_total|floatformat:2 }}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333;">
+                    {% if row.clasificacion == 'VIP' %}
+                    <span style="padding: 5px 10px; background: #4caf50; color: white; border-radius: 3px; font-weight: bold;">VIP</span>
+                    {% elif row.clasificacion == 'FRECUENTE' %}
+                    <span style="padding: 5px 10px; background: #2196f3; color: white; border-radius: 3px; font-weight: bold;">FRECUENTE</span>
+                    {% elif row.clasificacion == 'REGULAR' %}
+                    <span style="padding: 5px 10px; background: #ff9800; color: white; border-radius: 3px; font-weight: bold;">REGULAR</span>
+                    {% else %}
+                    <span style="padding: 5px 10px; background: #9e9e9e; color: white; border-radius: 3px; font-weight: bold;">NUEVO</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <p style="margin-top: 20px; color: #666;">
+        <strong>Total de clientes:</strong> {{ stats.total }}
+    </p>
+    {% else %}
+    <p style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px;">
+        No hay clientes registrados.
+    </p>
+    {% endif %}
+    
+    <!-- Botón para volver -->
+    <div style="margin-top: 30px;">
+        <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px; background: #417690; color: white; text-decoration: none; border-radius: 5px;">
+            ← Volver al Panel de Administración
+        </a>
+    </div>
+</div>
+
+<style>
+    table {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    th {
+        font-weight: bold;
+    }
+    
+    tbody tr:hover {
+        background: #3a3a3a !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}

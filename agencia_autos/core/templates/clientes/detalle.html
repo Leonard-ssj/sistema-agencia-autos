@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Cliente - {{ cliente.nombre_completo }}{% endblock %}
+
+{% block page_title %}Detalle de Cliente{% endblock %}
+{% block current_page %}Detalle de Cliente{% endblock %}
+
+{% block content_authenticated %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-900">
+                Detalle de Cliente
+            </h1>
+            <div class="space-x-3">
+                <a href="{% url 'editar_cliente' cliente.id %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                    Editar
+                </a>
+                <a href="{% url 'lista_clientes' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                    Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Cliente -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-blue-600 text-white px-6 py-4 rounded-t-lg">
+                <h3 class="text-lg font-semibold">Información Personal</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">ID:</span>
+                        <span class="text-gray-900">{{ cliente.id }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Nombre Completo:</span>
+                        <span class="text-gray-900 font-semibold">{{ cliente.nombre_completo }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Email:</span>
+                        <span class="text-gray-900">{{ cliente.email }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Teléfono:</span>
+                        <span class="text-gray-900">{{ cliente.telefono|default:"No registrado" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Dirección:</span>
+                        <span class="text-gray-900">{{ cliente.direccion|default:"No registrada" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Tipo de Documento:</span>
+                        <span class="text-gray-900">{{ cliente.tipo_documento.nombre }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Número de Documento:</span>
+                        <span class="text-gray-900">{{ cliente.numero_documento }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Fecha de Registro:</span>
+                        <span class="text-gray-900">{{ cliente.fecha_registro|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-green-600 text-white px-6 py-4 rounded-t-lg">
+                <h3 class="text-lg font-semibold">Estadísticas</h3>
+            </div>
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    {% if clasificacion == 'VIP' %}
+                    <span class="inline-block bg-green-500 text-white px-4 py-2 rounded-full text-xl font-bold">
+                        VIP
+                    </span>
+                    {% elif clasificacion == 'FRECUENTE' %}
+                    <span class="inline-block bg-blue-500 text-white px-4 py-2 rounded-full text-xl font-bold">
+                        FRECUENTE
+                    </span>
+                    {% elif clasificacion == 'REGULAR' %}
+                    <span class="inline-block bg-yellow-500 text-white px-4 py-2 rounded-full text-xl font-bold">
+                        REGULAR
+                    </span>
+                    {% else %}
+                    <span class="inline-block bg-gray-500 text-white px-4 py-2 rounded-full text-xl font-bold">
+                        NUEVO
+                    </span>
+                    {% endif %}
+                    <p class="text-gray-600 mt-2">Clasificación del Cliente</p>
+                </div>
+                <div class="border-t pt-4">
+                    <div class="space-y-4">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-600">Total de Compras:</span>
+                            <span class="text-gray-900 font-semibold">{{ total_compras }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-600">Monto Total:</span>
+                            <span class="text-gray-900 font-semibold">${{ monto_total|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Compras -->
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-indigo-600 text-white px-6 py-4 rounded-t-lg flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Historial de Compras</h3>
+            <span class="text-sm opacity-75">Procedimiento: historial_cliente()</span>
+        </div>
+        <div class="p-6">
+            {% if historial %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venta ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehículo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Año</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Método de Pago</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for venta in historial %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-blue-600 font-medium">#{{ venta.venta_id }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ venta.fecha_venta|date:"d/m/Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="font-medium text-gray-900">{{ venta.vehiculo_marca }} {{ venta.vehiculo_modelo }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ venta.vehiculo_anio }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <span class="font-semibold text-gray-900">${{ venta.total_venta|floatformat:2 }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ venta.metodo_pago }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ venta.empleado_nombre }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                {% if venta.estado_venta == 'ACTIVA' %}
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    ACTIVA
+                                </span>
+                                {% elif venta.estado_venta == 'CANCELADA' %}
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                    CANCELADA
+                                </span>
+                                {% else %}
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    {{ venta.estado_venta }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-blue-800">Este cliente aún no ha realizado ninguna compra.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

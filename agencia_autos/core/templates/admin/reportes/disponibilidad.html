@@ -1,0 +1,122 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header }}</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    <p><strong>Procedimiento Almacenado:</strong> <code>disponibilidad_por_marca_tipo()</code></p>
+    
+    <!-- Filtros -->
+    <form method="get" style="margin: 20px 0; padding: 15px; background: #000000; border-radius: 5px;">
+        <label for="marca">Marca:</label>
+        <select name="marca" id="marca">
+            <option value="">Todas las marcas</option>
+            {% for marca in marcas %}
+            <option value="{{ marca.id }}" {% if marca_seleccionada == marca.id %}selected{% endif %}>{{ marca.nombre }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="tipo" style="margin-left: 20px;">Tipo:</label>
+        <select name="tipo" id="tipo">
+            <option value="">Todos los tipos</option>
+            {% for tipo in tipos %}
+            <option value="{{ tipo.id }}" {% if tipo_seleccionado == tipo.id %}selected{% endif %}>{{ tipo.nombre }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="solo_disponibles" style="margin-left: 20px;">
+            <input type="checkbox" name="solo_disponibles" id="solo_disponibles" value="true" {% if solo_disponibles %}checked{% endif %}>
+            Solo disponibles
+        </label>
+        
+        <button type="submit" style="margin-left: 20px; padding: 5px 15px;">Filtrar</button>
+        <a href="{% url 'admin_disponibilidad' %}" style="margin-left: 10px; padding: 5px 15px; background: #ccc; color: #000; text-decoration: none; border-radius: 3px;">Limpiar</a>
+    </form>
+    
+    <!-- Tabla de resultados -->
+    {% if results %}
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="background: #000000; color: #ffffff;">
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">ID</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Marca</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Modelo</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333;">Año</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">Precio</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Color</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Tipo</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333;">Estado</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333;">Días en Inventario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr style="{% cycle 'background: #1a1a1a; color: #ffffff;' 'background: #2a2a2a; color: #ffffff;' %}">
+                <td style="padding: 8px; border: 1px solid #333;">
+                    <a href="{% url 'admin:core_vehiculo_change' row.vehiculo_id %}" style="color: #4fc3f7;">
+                        {{ row.vehiculo_id }}
+                    </a>
+                </td>
+                <td style="padding: 8px; border: 1px solid #333; font-weight: bold;">{{ row.marca }}</td>
+                <td style="padding: 8px; border: 1px solid #333;">{{ row.modelo }}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333;">{{ row.anio }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333; font-weight: bold; color: #66bb6a;">
+                    ${{ row.precio|floatformat:2 }}
+                </td>
+                <td style="padding: 8px; border: 1px solid #333;">{{ row.color }}</td>
+                <td style="padding: 8px; border: 1px solid #333;">{{ row.tipo_vehiculo }}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333;">
+                    {% if row.estado_disponibilidad == 'DISPONIBLE' %}
+                    <span style="padding: 5px 10px; background: #4caf50; color: white; border-radius: 3px; font-weight: bold;">DISPONIBLE</span>
+                    {% elif row.estado_disponibilidad == 'VENDIDO' %}
+                    <span style="padding: 5px 10px; background: #f44336; color: white; border-radius: 3px; font-weight: bold;">VENDIDO</span>
+                    {% else %}
+                    <span style="padding: 5px 10px; background: #ff9800; color: white; border-radius: 3px; font-weight: bold;">RESERVADO</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333;">
+                    {{ row.dias_en_inventario }} días
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <p style="margin-top: 20px; color: #666;">
+        <strong>Total de vehículos:</strong> {{ results|length }}
+    </p>
+    {% else %}
+    <p style="margin-top: 20px; padding: 15px; background: #000000; border: 1px solid #000000; border-radius: 5px;">
+        No hay vehículos disponibles para los filtros seleccionados.
+    </p>
+    {% endif %}
+    
+    <!-- Botón para volver -->
+    <div style="margin-top: 30px;">
+        <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px; background: #417690; color: white; text-decoration: none; border-radius: 5px;">
+            ← Volver al Panel de Administración
+        </a>
+    </div>
+</div>
+
+<style>
+    table {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    th {
+        font-weight: bold;
+    }
+    
+    tbody tr:hover {
+        background: #3a3a3a !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header }}</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    <p><strong>Vista:</strong> <code>vw_top_marcas_anio</code> / <code>vw_top5_marcas</code></p>
+    <p><strong>Técnicas:</strong> <code>RANK()</code>, <code>DENSE_RANK()</code>, <code>ROW_NUMBER()</code></p>
+    
+    <!-- Filtros -->
+    <form method="get" style="margin: 20px 0; padding: 15px; background: #000000; border-radius: 5px;">
+        <label for="anio">Año:</label>
+        <select name="anio" id="anio">
+            <option value="">Todos los años</option>
+            {% for anio in anios_disponibles %}
+            <option value="{{ anio }}" {% if anio_seleccionado == anio|stringformat:"s" %}selected{% endif %}>{{ anio }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" style="margin-left: 20px; padding: 5px 15px;">Filtrar</button>
+        <a href="{% url 'admin_ranking_marcas' %}" style="margin-left: 10px; padding: 5px 15px; background: #ccc; color: #000; text-decoration: none; border-radius: 3px;">Limpiar</a>
+    </form>
+    
+    <!-- Tabla de RANKING -->
+    {% if results %}
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="background: #000000; color: #ffffff;">
+                <th style="padding: 10px; text-align: center; border: 1px solid #333; width: 80px;">Posición</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333; width: 80px;">Año</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #333;">Marca</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">Total Ventas</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333;">Cantidad Ventas</th>
+                <th style="padding: 10px; text-align: center; border: 1px solid #333;">Vehículos</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">Promedio</th>
+                <th style="padding: 10px; text-align: right; border: 1px solid #333;">% del Año</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr style="{% cycle 'background: #1a1a1a; color: #ffffff;' 'background: #2a2a2a; color: #ffffff;' %}">
+                <td style="padding: 8px; text-align: center; border: 1px solid #333; font-size: 24px; font-weight: bold;">
+                    {% if row.posicion == 1 %}
+                    <span style="color: #ffd700;">1</span>
+                    {% elif row.posicion == 2 %}
+                    <span style="color: #c0c0c0;">2</span>
+                    {% elif row.posicion == 3 %}
+                    <span style="color: #cd7f32;">3</span>
+                    {% else %}
+                    {{ row.posicion }}
+                    {% endif %}
+                </td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333; font-weight: bold;">{{ row.anio }}</td>
+                <td style="padding: 8px; border: 1px solid #333; font-size: 16px; font-weight: bold;">{{ row.marca }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333; font-weight: bold; color: #2e7d32;">
+                    ${{ row.total_ventas|floatformat:2 }}
+                </td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333;">{{ row.cantidad_ventas }}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #333;">{{ row.cantidad_vehiculos }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333;">${{ row.promedio_venta|floatformat:2 }}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #333;">
+                    <div style="display: flex; align-items: center; justify-content: flex-end;">
+                        <div style="width: 100px; height: 20px; background: #e0e0e0; border-radius: 10px; margin-right: 10px; overflow: hidden;">
+                            <div style="width: {{ row.porcentaje_del_anio }}%; height: 100%; background: linear-gradient(90deg, #4caf50, #8bc34a); border-radius: 10px;"></div>
+                        </div>
+                        <span style="font-weight: bold;">{{ row.porcentaje_del_anio }}%</span>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
+        <p style="margin: 0 0 10px 0; font-size: 14px;">
+            <strong>Explicación del RANKING:</strong>
+        </p>
+        <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+            <li><code>RANK()</code> - Asigna posiciones con saltos en caso de empates (1, 2, 2, 4)</li>
+            <li><code>DENSE_RANK()</code> - Asigna posiciones sin saltos en caso de empates (1, 2, 2, 3)</li>
+            <li><code>ROW_NUMBER()</code> - Asigna posiciones únicas sin empates (1, 2, 3, 4)</li>
+            <li><code>PARTITION BY anio</code> - Reinicia el ranking para cada año</li>
+            <li><code>ORDER BY total_ventas DESC</code> - Ordena por ventas de mayor a menor</li>
+        </ul>
+    </div> -->
+    
+    <p style="margin-top: 20px; color: #666;">
+        <strong>Total de marcas mostradas:</strong> {{ results|length }}
+    </p>
+    {% else %}
+    <p style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px;">
+        No hay datos disponibles para los filtros seleccionados.
+    </p>
+    {% endif %}
+    
+    <!-- Botón para volver -->
+    <div style="margin-top: 30px;">
+        <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px; background: #000000; color: #ffffff; text-decoration: none; border-radius: 5px;">
+            ← Volver al Panel de Administración
+        </a>
+    </div>
+</div>
+
+<style>
+    table {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    th {
+        font-weight: bold;
+    }
+    
+    tbody tr:hover {
+        background: #3a3a3a !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}

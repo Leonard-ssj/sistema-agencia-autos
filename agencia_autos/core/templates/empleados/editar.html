@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Empleado - Agencia de Autos{% endblock %}
+
+{% block page_title %}Editar Empleado{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'home' %}" class="hover:text-gray-700">Inicio</a>
+    <span class="mx-2">/</span>
+    <a href="{% url 'empleado_lista' %}" class="hover:text-gray-700">Empleados</a>
+    <span class="mx-2">/</span>
+    <span>Editar #{{ empleado.id }}</span>
+{% endblock %}
+
+{% block current_page %}Editar Empleado{% endblock %}
+
+{% block content_authenticated %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Editar Empleado #{{ empleado.id }}</h2>
+        <p class="text-gray-600 mt-1">{{ empleado.nombre_completo }}</p>
+    </div>
+    <a href="{% url 'empleado_lista' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver a Lista
+    </a>
+</div>
+
+<div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div class="ml-3">
+            <h4 class="text-sm font-semibold text-blue-800 mb-1">Información Actual</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-blue-700">
+                <div><span class="font-medium">ID:</span> #{{ empleado.id }}</div>
+                <div><span class="font-medium">Usuario:</span> {{ empleado.usuario }}</div>
+                <div><span class="font-medium">Ingreso:</span> {{ empleado.fecha_ingreso|date:"d/m/Y" }}</div>
+                <div>
+                    <span class="font-medium">Estado:</span>
+                    {% if empleado.estado == 'ACTIVO' %}
+                        <span class="text-green-700 font-semibold">Activo</span>
+                    {% else %}
+                        <span class="text-red-700 font-semibold">Inactivo</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <form method="post" class="max-w-2xl">
+        {% csrf_token %}
+        
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-blue-500">Información Personal</h3>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre Completo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="nombre_completo" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                           value="{{ empleado.nombre_completo }}"
+                           placeholder="Ej: Juan Carlos Pérez García">
+                    <p class="mt-1 text-sm text-gray-500">Modifica el nombre completo del empleado</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Puesto <span class="text-red-500">*</span>
+                    </label>
+                    <select name="puesto" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                        <option value="Vendedor" {% if empleado.puesto == 'Vendedor' %}selected{% endif %}>Vendedor</option>
+                        <option value="Vendedor Senior" {% if empleado.puesto == 'Vendedor Senior' %}selected{% endif %}>Vendedor Senior</option>
+                        <option value="Supervisor de Ventas" {% if empleado.puesto == 'Supervisor de Ventas' %}selected{% endif %}>Supervisor de Ventas</option>
+                        <option value="Asesor Comercial" {% if empleado.puesto == 'Asesor Comercial' %}selected{% endif %}>Asesor Comercial</option>
+                        <option value="Ejecutivo de Ventas" {% if empleado.puesto == 'Ejecutivo de Ventas' %}selected{% endif %}>Ejecutivo de Ventas</option>
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Cambia el puesto del empleado si es necesario</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-green-500">Estado del Empleado</h3>
+            
+            <div class="space-y-3">
+                <label class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input type="radio" name="estado" value="ACTIVO" 
+                           {% if empleado.estado == 'ACTIVO' %}checked{% endif %}
+                           class="mt-1 mr-3">
+                    <div class="flex-1">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="font-semibold text-green-700">Activo</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">El empleado puede iniciar sesión en el sistema</p>
+                    </div>
+                </label>
+                
+                <label class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input type="radio" name="estado" value="INACTIVO" 
+                           {% if empleado.estado == 'INACTIVO' %}checked{% endif %}
+                           class="mt-1 mr-3">
+                    <div class="flex-1">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            <span class="font-semibold text-red-700">Inactivo</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">El empleado NO puede iniciar sesión en el sistema</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 rounded-r-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h4 class="text-sm font-semibold text-yellow-800 mb-2">Importante</h4>
+                    <ul class="text-sm text-yellow-700 space-y-1 list-disc list-inside">
+                        <li>Los cambios en el nombre se reflejarán en el sistema inmediatamente</li>
+                        <li>Si cambias el estado a "Inactivo", el empleado no podrá iniciar sesión</li>
+                        <li>El nombre de usuario y la fecha de ingreso NO se pueden modificar</li>
+                        <li>Para cambiar la contraseña, usa el panel de administración de Django</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-100 border border-gray-300 p-4 mb-6 rounded-lg">
+            <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Información No Editable
+            </h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-700">
+                <div><span class="font-medium">Usuario:</span> {{ empleado.usuario }}</div>
+                <div><span class="font-medium">Fecha Ingreso:</span> {{ empleado.fecha_ingreso|date:"d/m/Y" }}</div>
+                <div><span class="font-medium">Creación:</span> {{ empleado.fecha_creacion|date:"d/m/Y" }}</div>
+                <div><span class="font-medium">Modificación:</span> {{ empleado.fecha_modificacion|date:"d/m/Y" }}</div>
+            </div>
+        </div>
+        
+        <div class="flex gap-4 pt-6 border-t border-gray-200">
+            <button type="submit" class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors shadow-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Guardar Cambios
+            </button>
+            <a href="{% url 'empleado_lista' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const nombre = document.querySelector('input[name="nombre_completo"]').value;
+    const estado = document.querySelector('input[name="estado"]:checked').value;
+    
+    let mensaje = `¿Estás seguro de guardar los cambios para "${nombre}"?`;
+    
+    if (estado === 'INACTIVO') {
+        mensaje += '\n\n ATENCIÓN: El empleado quedará INACTIVO y no podrá iniciar sesión.';
+    }
+    
+    if (!confirm(mensaje)) {
+        e.preventDefault();
+    }
+});
+
+document.querySelectorAll('input[name="estado"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const estadoActual = '{{ empleado.estado }}';
+        const nuevoEstado = this.value;
+        
+        document.querySelectorAll('input[name="estado"]').forEach(r => {
+            r.parentElement.classList.remove('border-yellow-500', 'bg-yellow-50');
+            r.parentElement.classList.add('border-gray-300');
+        });
+        
+        if (estadoActual !== nuevoEstado) {
+            this.parentElement.classList.add('border-yellow-500', 'bg-yellow-50');
+            this.parentElement.classList.remove('border-gray-300');
+        }
+    });
+});
+</script>
+{% endblock %}
