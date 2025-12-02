@@ -19,6 +19,48 @@ Proyecto escolar que demuestra la implementación de técnicas avanzadas de admi
 - **Frontend**: HTML5 + Tailwind CSS
 - **ORM**: Django ORM con consultas SQL nativas
 
+## Diagramas del Sistema
+
+### Diagrama Entidad-Relación
+
+Modelo de base de datos con 9 tablas principales y sus relaciones:
+
+![Diagrama ER](images/ER.png)
+
+### Diagrama de Casos de Uso
+
+Funcionalidades principales del sistema por rol de usuario:
+
+![Casos de Uso](images/Casos_De_Uso.png)
+
+### Diagrama de Clases UML
+
+Arquitectura orientada a objetos de la aplicación Django:
+
+![Diagrama UML](images/UML_Clases.png)
+
+### Diagramas de Secuencia
+
+<details>
+<summary>Ver diagramas de secuencia de operaciones</summary>
+
+#### Registrar Venta
+Flujo completo del proceso de registro de venta con validaciones y triggers:
+
+![Secuencia Registrar Venta](images/secuencia_registrar_venta.png)
+
+#### Cancelar Venta
+Proceso de cancelación con rollback y auditoría:
+
+![Secuencia Cancelar Venta](images/secuencia_cancelar.png)
+
+#### Manejo de Errores
+Sistema de captura y registro de errores en auditoría:
+
+![Secuencia Error](images/secuencia_error.png)
+
+</details>
+
 ## Estructura del Proyecto
 
 ```
